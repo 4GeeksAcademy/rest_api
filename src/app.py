@@ -8,7 +8,8 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, People, Planet
+from models import db, User, People, Planet, Favorites
+
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -82,7 +83,7 @@ def get_planet(planet_id):
 # Add a new favorite person to the current user
 @app.route('/favorite/people/<int:people_id>', methods=['POST'])
 def add_favorite_people(people_id):
-    person = Person.query.get(people_id)
+    person = People.query.get(people_id)
     if not person:
         return jsonify({"error": "Person not found"}), 404
 
@@ -92,7 +93,7 @@ def add_favorite_people(people_id):
         return jsonify({"error": "User not found"}), 404
 
     # Check if this favorite already exists
-    existing_favorite = db.session.query(favorites).filter_by(
+    existing_favorite = db.session.query(Favorites).filter_by(
         user_id=user.id, entity_id=people_id, entity_type="person"
     ).first()
     if existing_favorite:
@@ -100,7 +101,7 @@ def add_favorite_people(people_id):
 
     # Add to favorites
     new_favorite = {"user_id": user.id, "entity_id": people_id, "entity_type": "person"}
-    db.session.add(favorites, new_favorite)
+    db.session.add(Favorites, new_favorite)
     db.session.commit()
     return jsonify({"success": "Favorite added"}), 200
 
@@ -112,7 +113,7 @@ def delete_favorite_planet(planet_id):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    favorite = db.session.query(favorites).filter_by(
+    favorite = db.session.query(Favorites).filter_by(
         user_id=user.id, entity_id=planet_id, entity_type="planet"
     ).first()
     if not favorite:
@@ -131,7 +132,7 @@ def delete_favorite_people(people_id):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    favorite = db.session.query(favorites).filter_by(
+    favorite = db.session.query(Favorites).filter_by(
         user_id=user.id, entity_id=people_id, entity_type="person"
     ).first()
     if not favorite:
