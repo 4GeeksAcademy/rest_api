@@ -56,12 +56,12 @@ def get_user(user_id):
 # People Endpoints
 @app.route('/people', methods=['GET'])
 def get_people():
-    people = Person.query.all()
+    people = People.query.all()
     return jsonify([person.name for person in people])
 
 @app.route('/people/<int:people_id>', methods=['GET'])
 def get_person(people_id):
-    person = Person.query.get(people_id)
+    person = People.query.get(people_id)
     if person:
         return jsonify(person.name)
     return jsonify({"error": "Not Found"}), 404
